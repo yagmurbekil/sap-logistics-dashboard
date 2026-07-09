@@ -1,10 +1,18 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { mockMovements, type LogisticMovement } from './data';
 import { BarChart3, Package, AlertTriangle, ArrowUpRight, RefreshCw } from 'lucide-react';
 
 export default function App() {
-  const [movements] = useState<LogisticMovement[]>(mockMovements);
+  const [movements, setMovements] = useState<LogisticMovement[]>([]);
+  
   const [selectedPlant, setSelectedPlant] = useState<string>('All');
+
+  useEffect(() => {
+    fetch('http://localhost:3001/movements')
+      .then(response => response.json())
+      .then(data => setMovements(data))
+      .catch(error => console.error('SAP sunucu hatası:', error));
+  }, []); 
 
   const filteredMovements = selectedPlant === 'All' 
     ? movements 
