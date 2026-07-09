@@ -1,0 +1,82 @@
+{
+  "movements": [
+    {
+      "id": 1,
+      "material": "MAT-0092",
+      "materialDesc": "Çelik Somun 10mm",
+      "movementType": "101",
+      "quantity": 500,
+      "unit": "ST",
+      "vendor": "Demir Çelik A.Ş.",
+      "incoterm": "FOB",
+      "plant": "1000",
+      "currentStock": 150,
+      "safetyStock": 200
+    },
+    {
+      "id": 2,
+      "material": "MAT-0092",
+      "materialDesc": "Çelik Somun 10mm",
+      "movementType": "102",
+      "quantity": 50,
+      "unit": "ST",
+      "vendor": "Demir Çelik A.Ş.",
+      "incoterm": "FOB",
+      "plant": "1000",
+      "currentStock": 150,
+      "safetyStock": 200
+    },
+    {
+      "id": 3,
+      "material": "MAT-0145",
+      "materialDesc": "Bakır Kablo 2.5mm",
+      "movementType": "101",
+      "quantity": 120,
+      "unit": "M",
+      "vendor": "Tekno Kablo Ltd.",
+      "incoterm": "EXW",
+      "plant": "1100",
+      "currentStock": 400,
+      "safetyStock": 100
+    },
+    {
+      "id": 4,
+      "material": "MAT-0145",
+      "materialDesc": "Bakır Kablo 2.5mm",
+      "movementType": "261",
+      "quantity": 30,
+      "unit": "M",
+      "vendor": "Tekno Kablo Ltd.",
+      "incoterm": "EXW",
+      "plant": "1100",
+      "currentStock": 400,
+      "safetyStock": 100
+    },
+    {
+      "id": 5,
+      "material": "MAT-0881",
+      "materialDesc": "Asansör Motoru 15KW",
+      "movementType": "101",
+      "quantity": 5,
+      "unit": "ST",
+      "vendor": "Volta Motor",
+      "incoterm": "DDP",
+      "plant": "1000",
+      "currentStock": 2,
+      "safetyStock": 5
+    },
+    {
+      "id": 6,
+      "material": "MAT-0092",
+      "materialDesc": "Çelik Somun 10mm",
+      "movementType": "261",
+      "quantity": 200,
+      "unit": "ST",
+      "vendor": "Demir Çelik A.Ş.",
+      "incoterm": "FOB",
+      "plant": "1000",
+      "currentStock": 150,
+      "safetyStock": 200
+    }
+  ]
+}

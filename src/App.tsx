@@ -1,17 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { mockMovements, type LogisticMovement } from './data';
-import { BarChart3, Package, AlertTriangle, ArrowDownRight, ArrowUpRight, RefreshCw } from 'lucide-react';
+import { BarChart3, Package, AlertTriangle, ArrowUpRight, RefreshCw } from 'lucide-react';
 
 export default function App() {
-  const [movements, setMovements] = useState<LogisticMovement[]>(mockMovements);
+  const [movements, setMovements] = useState<LogisticMovement[]>([]);
+  
   const [selectedPlant, setSelectedPlant] = useState<string>('All');
 
-  // Filtreleme Mantığı: Seçilen fabrikaya göre verileri süzüyoruz
+  useEffect(() => {
+    fetch('http://localhost:3001/movements')
+      .then(response => response.json())
+      .then(data => setMovements(data))
+      .catch(error => console.error('SAP sunucu hatası:', error));
+  }, []); 
+
   const filteredMovements = selectedPlant === 'All' 
     ? movements 
     : movements.filter(m => m.plant === selectedPlant);
 
-  // SAP Lojistik Metrikleri Hesaplama 
   const totalMalGiris_101 = filteredMovements
     .filter(m => m.movementType === '101')
     .reduce((sum, m) => sum + m.quantity, 0);
@@ -24,27 +30,25 @@ export default function App() {
     .filter(m => m.movementType === '261')
     .reduce((sum, m) => sum + m.quantity, 0);
 
-  // MİP (MRP) Tetikleme Fonksiyonu: Güvenlik stoğu altına düşen ürün için
   const handleMipTrigger = (materialName: string) => {
-    alert(`MİP Algoritması Tetiklendi!\n\n"${materialName}" ürünü için güvenlik stoğu kritik seviyede olduğundan arka planda otomatik Satın Alma Talebi (Purchase Requisition) oluşturuldu.`);
+    alert(`MİP Algoritması Tetiklendi!\n\n"${materialName}" ürünü için otomatik Satın Alma Talebi oluşturuldu.`);
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans p-6">
-      {/* Header */}
-      <header className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800 pb-5 gap-4">
+    <div style={{ backgroundColor: '#0f172a', color: '#f8fafc', minHeight: '100vh', padding: '24px', fontFamily: 'sans-serif' }}>
+      
+      {/* Üst Başlık Alanı */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #334155', paddingBottom: '16px', marginBottom: '24px' }}>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-2">
-            <BarChart3 className="text-blue-500" /> Yagmur <span className="text-slate-400 font-normal text-xl">| SAP MM Analiz Paneli</span>
+          <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <BarChart3 style={{ color: '#3b82f6' }} /> Yagmur | SAP MM Analiz Paneli
           </h1>
-          <p className="text-slate-400 mt-1">SAP Veri Modelleri Üzerinden Gerçek Zamanlı Lojistik ve İhtiyaç Planlaması</p>
+          <p style={{ color: '#94a3b8', fontSize: '14px', marginTop: '4px' }}>SAP Veri Modelleri Üzerinden Gerçek Zamanlı Lojistik Takibi</p>
         </div>
-        
-        {/* Fabrika Filtresi (Organizasyon Yapısı) */}
-        <div className="flex items-center gap-3">
-          <label className="text-sm font-medium text-slate-400">Üretim Yeri (Plant):</label>
+        <div>
+          <label style={{ fontSize: '14px', marginRight: '8px', color: '#94a3b8' }}>Üretim Yeri (Plant):</label>
           <select 
-            className="bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{ backgroundColor: '#1e293b', color: 'white', border: '1px solid #475569', padding: '6px 12px', borderRadius: '6px' }}
             value={selectedPlant}
             onChange={(e) => setSelectedPlant(e.target.value)}
           >
@@ -53,100 +57,74 @@ export default function App() {
             <option value="1100">Plant 1100 (Eskişehir)</option>
           </select>
         </div>
-      </header>
+      </div>
 
-      {/* KPI Cards Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* 101 Giriş Kartı */}
-        <div className="bg-slate-800/50 border border-slate-800 p-6 rounded-xl relative overflow-hidden">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-slate-400 tracking-wider uppercase">Toplam Mal Girişi (İTü: 101)</p>
-              <h3 className="text-3xl font-bold text-white mt-2">{totalMalGiris_101.toLocaleString()} <span className="text-sm font-normal text-slate-400">Birim</span></h3>
-            </div>
-            <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-lg">
-              <ArrowUpRight size={24} />
-            </div>
-          </div>
-          <div className="mt-4 text-xs text-emerald-400 font-medium">Tedarikçilerden depoya kabul edilen net miktarlar.</div>
+      {/* KPI Kartları - Yan Yana Düzen */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+        
+        {/* 101 Kartı */}
+        <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', padding: '16px', borderRadius: '12px' }}>
+          <p style={{ fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', margin: 0 }}>Toplam Mal Girişi (İTü: 101)</p>
+          <h3 style={{ fontSize: '28px', fontWeight: 'bold', margin: '8px 0 0 0', color: '#10b981' }}>{totalMalGiris_101} <span style={{ fontSize: '14px', color: '#94a3b8', fontWeight: 'normal' }}>Birim</span></h3>
         </div>
 
-        {/* 261 Çıkış Kartı */}
-        <div className="bg-slate-800/50 border border-slate-800 p-6 rounded-xl relative overflow-hidden">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-slate-400 tracking-wider uppercase">Üretim Tüketimi (İTü: 261)</p>
-              <h3 className="text-3xl font-bold text-white mt-2">{totalUretimCikis_261.toLocaleString()} <span className="text-sm font-normal text-slate-400">Birim</span></h3>
-            </div>
-            <div className="p-3 bg-blue-500/10 text-blue-400 rounded-lg">
-              <Package size={24} />
-            </div>
-          </div>
-          <div className="mt-4 text-xs text-blue-400 font-medium">Üretim bandına çekilen hammadde miktarı.</div>
+        {/* 261 Kartı */}
+        <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', padding: '16px', borderRadius: '12px' }}>
+          <p style={{ fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', margin: 0 }}>Üretim Tüketimi (İTü: 261)</p>
+          <h3 style={{ fontSize: '28px', fontWeight: 'bold', margin: '8px 0 0 0', color: '#3b82f6' }}>{totalUretimCikis_261} <span style={{ fontSize: '14px', color: '#94a3b8', fontWeight: 'normal' }}>Birim</span></h3>
         </div>
 
-        {/* 102 İptal Kartı */}
-        <div className="bg-slate-800/50 border border-slate-800 p-6 rounded-xl relative overflow-hidden">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-sm font-medium text-slate-400 tracking-wider uppercase">Ters Kayıt / İptal (İTü: 102)</p>
-              <h3 className="text-3xl font-bold text-rose-400 mt-2">{totalIptal_102.toLocaleString()} <span className="text-sm font-normal text-slate-400">Birim</span></h3>
-            </div>
-            <div className="p-3 bg-rose-500/10 text-rose-400 rounded-lg">
-              <AlertTriangle size={24} />
-            </div>
-          </div>
-          <div className="mt-4 text-xs text-rose-400 font-medium">Kullanıcı hatası veya iade kaynaklı ters hareket hacmi.</div>
+        {/* 102 Kartı */}
+        <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', padding: '16px', borderRadius: '12px' }}>
+          <p style={{ fontSize: '12px', color: '#94a3b8', textTransform: 'uppercase', margin: 0 }}>Ters Kayıt / İptal (İTü: 102)</p>
+          <h3 style={{ fontSize: '28px', fontWeight: 'bold', margin: '8px 0 0 0', color: '#f43f5e' }}>{totalIptal_102} <span style={{ fontSize: '14px', color: '#94a3b8', fontWeight: 'normal' }}>Birim</span></h3>
         </div>
-      </section>
 
-      {/* Main Content Area: SAP Malzeme Hareketi Rapor Tablosu */}
-      <section className="bg-slate-800/30 border border-slate-800 rounded-xl p-6">
-        <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-          <RefreshCw size={20} className="text-blue-400 animate-spin-slow" /> Stok ve İhtiyaç Planlama Takip Matrisi
+      </div>
+
+      {/* Tablo Alanı */}
+      <div style={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px', padding: '20px' }}>
+        <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', margin: '0 0 16px 0' }}>
+          <RefreshCw size={18} style={{ color: '#3b82f6' }} /> Stok ve İhtiyaç Planlama Takip Matrisi
         </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 text-sm">
-                <th className="pb-3 font-semibold">Malzeme Kodu</th>
-                <th className="pb-3 font-semibold">Kısa Metin</th>
-                <th className="pb-3 font-semibold text-center">İTü</th>
-                <th className="pb-3 font-semibold text-center">Miktar</th>
-                <th className="pb-3 font-semibold">Tedarikçi (BP)</th>
-                <th className="pb-3 font-semibold">Teslimat Şekli</th>
-                <th className="pb-3 font-semibold text-right">MİP Durumu</th>
+              <tr style={{ borderBottom: '1px solid #334155', color: '#94a3b8', fontSize: '14px' }}>
+                <th style={{ paddingBottom: '12px' }}>Malzeme Kodu</th>
+                <th style={{ paddingBottom: '12px' }}>Kısa Metin</th>
+                <th style={{ paddingBottom: '12px', textAlign: 'center' }}>İTü</th>
+                <th style={{ paddingBottom: '12px', textAlign: 'center' }}>Miktar</th>
+                <th style={{ paddingBottom: '12px' }}>Tedarikçi</th>
+                <th style={{ paddingBottom: '12px' }}>Teslimat</th>
+                <th style={{ paddingBottom: '12px', textAlign: 'right' }}>MİP Durumu</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/50 text-sm">
+            <tbody style={{ fontSize: '14px' }}>
               {filteredMovements.map((m) => {
                 const isCritical = m.currentStock < m.safetyStock;
                 return (
-                  <tr key={m.id} className="hover:bg-slate-800/20 transition-colors">
-                    <td className="py-4 font-mono font-medium text-blue-400">{m.material}</td>
-                    <td className="py-4 text-slate-200">{m.materialDesc}</td>
-                    <td className="py-4 text-center">
-                      <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${
-                        m.movementType === '101' ? 'bg-emerald-500/10 text-emerald-400' :
-                        m.movementType === '102' ? 'bg-rose-500/10 text-rose-400' :
-                        m.movementType === '261' ? 'bg-blue-500/10 text-blue-400' : 'bg-slate-700 text-slate-300'
-                      }`}>
+                  <tr key={m.id} style={{ borderBottom: '1px solid #334155' }}>
+                    <td style={{ padding: '12px 0', fontFamily: 'monospace', color: '#60a5fa' }}>{m.material}</td>
+                    <td style={{ padding: '12px 0' }}>{m.materialDesc}</td>
+                    <td style={{ padding: '12px 0', textAlign: 'center' }}>
+                      <span style={{ padding: '2px 6px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', backgroundColor: m.movementType === '101' ? '#065f46' : m.movementType === '102' ? '#991b1b' : '#1e3a8a', color: 'white' }}>
                         {m.movementType}
                       </span>
                     </td>
-                    <td className="py-4 text-center font-semibold">{m.quantity} {m.unit}</td>
-                    <td className="py-4 text-slate-400">{m.vendor}</td>
-                    <td className="py-4 text-slate-300 font-medium">{m.incoterm}</td>
-                    <td className="py-4 text-right">
+                    <td style={{ padding: '12px 0', textAlign: 'center', fontWeight: 'bold' }}>{m.quantity} {m.unit}</td>
+                    <td style={{ padding: '12px 0', color: '#94a3b8' }}>{m.vendor}</td>
+                    <td style={{ padding: '12px 0', color: '#cbd5e1' }}>{m.incoterm}</td>
+                    <td style={{ padding: '12px 0', textAlign: 'right' }}>
                       {isCritical ? (
                         <button 
                           onClick={() => handleMipTrigger(m.materialDesc)}
-                          className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-2.5 py-1 rounded text-xs transition-colors shadow-sm animate-pulse"
+                          style={{ backgroundColor: '#d97706', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer', fontWeight: 'bold' }}
                         >
                           MİP Tetikle
                         </button>
                       ) : (
-                        <span className="text-slate-500 text-xs font-medium">Stok Yeterli</span>
+                        <span style={{ color: '#64748b', fontSize: '12px' }}>Stok Yeterli</span>
                       )}
                     </td>
                   </tr>
@@ -155,7 +133,8 @@ export default function App() {
             </tbody>
           </table>
         </div>
-      </section>
+      </div>
+
     </div>
   );
 }
